@@ -1,0 +1,7 @@
+SINKS=$(wpctl status | sed -Ez "s/^.*Audio\n ├.*Sinks:\n( │.*) │  \n ├─ Sink endpoints:.*Video\n ├.*$/\1/" | sed -E "s/^ │  (.)   ([0-9]+).*$/\1\2/" | sed -E "s/ //g" | sed -E "s/\n/ /g")
+ACTIVE=$(echo $SINKS | sed -Ez "s/^.*\*([0-9]+).*$/\1/")
+SINKS=$(echo $SINKS | sed -Ez "s/\*//g")
+SINKS2=$(echo $SINKS && echo $SINKS)
+NEXT=$(echo $SINKS2 | sed -E "s/^.*$ACTIVE ([0-9]+).*$/\1/")
+
+echo $ACTIVE $NEXT $SINKS

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+GETSINKS=$(/home/has/.config/hypr/wireplumber/getSinks)
+ACTIVE=$(echo $GETSINKS | sed -E "s/^([0-9]+).*$/\1/")
+NEXT=$(echo $GETSINKS | sed -E "s/^$ACTIVE ([0-9]+).*$/\1/")
+SINKS=$(echo $GETSINKS | sed -E "s/^$ACTIVE $NEXT //")
+
+wpctl set-mute $ACTIVE toggle

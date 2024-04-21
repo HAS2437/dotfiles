@@ -1,0 +1,112 @@
+@import url("/home/has/.config/hypr/colors-gtk.css");
+
+* {
+    font-family: "JetBrains Mono";
+    font-size: 14px;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+ }
+
+window {
+    margin: 0px;
+    padding: 0px;
+
+    background-color: @colorBackground;
+    border: 2px solid @colorAccent;
+    border-radius: 5px;
+
+    animation: fadeIn 0.5s ease-in-out both;
+}
+
+#outer-box {
+    
+}
+
+#input {
+    margin: 20px 20px 10px 20px;
+    padding: 10px;
+    border: none;
+    color: @colorText;
+    background-color: transparent;
+}
+
+#input:focus {
+    box-shadow: 0 0 0px transparent;
+}
+
+#scroll {
+    margin: 10px 20px 20px 20px;
+    padding: 10px;
+    border: none;
+
+    background-color: transparent;
+}
+
+#inner-box {
+    
+}
+
+#entry {
+    background-color: transparent;
+    border: 2px solid transparent;
+}
+
+#text {
+    margin: 0px;
+    padding: 4px 4px 4px 4px;
+    color: @colorText;
+}
+
+#entry {
+    outline: none;
+}
+
+#entry > expander > title {
+    outline: none;
+}
+
+#entry:selected {
+   background-color: @colorAccent;
+   border: 2px solid @colorAccent;
+   border-radius: 5px;
+}
+
+#entry:selected #text {
+    color: @colorBackgroundOpaque;
+}
+
+#entry > expander > list {
+    background-color: transparent;
+}
+
+#entry > expander > list > #entry {
+    background-color: transparent;
+    border: none;
+}
+
+#entry > expander > list > #entry #text {
+    color: @colorText;
+}
+
+#entry:selected > expander > list > #entry:selected {
+    background-color: @colorPrimary;
+}
+
+/*
+window
+  outer-box
+    input
+    scroll
+      inner-box
+        entry
+          text
+
+*/

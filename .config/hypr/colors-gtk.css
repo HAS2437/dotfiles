@@ -1,0 +1,15 @@
+@define-color colorText              rgba(237, 236, 245, 1.0);
+@define-color colorBackground        rgba(8, 8, 8, 0.8);
+@define-color colorBackgroundOpaque  rgba(8, 8, 8, 1.0);
+@define-color colorPrimary           rgba(138, 17, 17, 1.0);
+@define-color colorSecondary         rgba(86, 19, 19, 1.0);
+@define-color colorAccent            rgba(211, 47, 47, 1.0);
+
+/* @define-color colorText              rgba(255, 255, 2555, 1.0);
+@define-color colorBackground        rgba(0, 0, 0, 0.8);
+@define-color colorBackgroundOpaque  rgba(0, 0, 0, 1.0);
+@define-color colorPrimary           rgba(64, 64, 255, 1.0);
+@define-color colorSecondary         rgba(0, 255, 0, 1.0);
+@define-color colorAccent            rgba(84, 84, 255, 1.0); */
+
+/* @define-color colorBackground  #303446; */

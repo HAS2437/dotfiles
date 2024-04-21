@@ -1,0 +1,69 @@
+@import url("/home/has/.config/hypr/colors-gtk.css");
+
+window#waybar {
+    color: @colorText;
+    font-family: "JetBrains Mono";
+    font-size: 14px;
+
+    background-color: @colorBackground;
+}
+
+button {
+    border: none;
+    border-radius: 0;
+}
+
+button:hover {
+    background: inherit;
+    box-shadow: none;
+    /* box-shadow: inset 0 -3px @colorText; */
+}
+
+#workspaces {
+    background-color: @colorPrimary;
+    /* border: 2px solid @colorPrimary; */
+}
+
+#workspaces button {
+    padding: 2px;
+    background-color: @colorPrimary;
+    color: @colorText;
+}
+
+#workspaces button.active {
+    background-color: @colorAccent;
+}
+
+#window {
+    color: @colorText;
+}
+
+#battery {
+    padding: 0px 5px 0px 5px;
+    color: @colorText;
+    background-color: @colorPrimary;
+}
+
+#custom-nightmode {
+    padding: 0px 8px 0px 5px;
+    color: @colorText;
+    background-color: @colorSecondary;
+}
+
+#wireplumber {
+    padding: 0px 5px 0px 5px;
+    color: @colorText;
+    background-color: @colorPrimary;
+}
+
+#tray {
+    padding: 0px 5px 0px 5px;
+    color: @colorText;
+    background-color: @colorSecondary;
+}
+
+#clock {
+    padding: 0px 5px 0px 5px;
+    color: @colorText;
+    background-color: @colorPrimary;
+}
