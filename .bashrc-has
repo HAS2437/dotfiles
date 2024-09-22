@@ -1,0 +1,67 @@
+#!/bin/bash
+
+#  _   _   ___   _____  _____   ___  _____  ______
+# | | | | / _ \ /  ___|/ __  \ /   ||____ ||___  /
+# | |_| |/ /_\ \\ `--. `' / /'/ /| |    / /   / / 
+# |  _  ||  _  | `--. \  / / / /_| |    \ \  / /  
+# | | | || | | |/\__/ /./ /__\___  |.___/ /./ /   
+# \_| |_/\_| |_/\____/ \_____/   |_/\____/ \_/  
+                      
+
+# Write into .bashrc
+# source ~/.bashrc-has
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+export TERM="xterm-256color" # Set terminal color
+
+shopt -s checkwinsize # Update the window size with changes
+
+# History
+export HISTCONTROL=ignoreboth # Disable duplicate lines
+shopt -s histappend # Append instead of overwrite
+export HISTFILESIZE=-1
+export HISTSIZE=-1
+PROMPT_COMMAND="history -a;$PROMPT_COMMAND" # Immediately write changes to .bash_history
+
+export EDITOR=micro
+export BROWSER=brave
+
+alias sudo="sudo -E"
+alias fcat="tail -c+1 -F"
+alias ls="ls -Alh --color=auto --group-directories-first"
+alias rm="trash -r"
+alias cp="cp -r"
+alias grep="grep --color=auto"
+alias fgrep="grep -F --color=auto"
+alias egrep="grep -E --color=auto"
+alias hl="grep --color=auto -e \"^\" -e"
+alias df="df -h"
+alias du="du -ad1 -h | sort -rk1 -h"
+
+alias nano="micro"
+alias yt="youtube-dl"
+alias yt-mp3="youtube-dl -x --audio-format mp3"
+alias whatismyip="curl ifconfig.me && echo"
+
+c++() {
+	g++ --std=c++20 -ggdb -g3 -D LOCAL -o /tmp/cpp.out $1 && /tmp/cpp.out
+}
+
+alias py="micro /tmp/tmp.py && python /tmp/tmp.py"
+
+alias 8g="ssh -p 22020 dalopir@server8g.dalopir.com"
+
+# git clone --bare git@github.com:HAS2437/dotfiles.git
+alias config="/usr/bin/git --git-dir=$HOME/dotfiles.git --work-tree=$HOME"
+# config checkout
+# config config --local status.showUntrackedFiles no
+
+parse_git_branch() {
+    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
+# export PS1=" \W $(parse_git_branch)\$ "
+export PS1="\W\[\033[31m\]\$(parse_git_branch)\[\033[00m\] \$ "
+
+# neofetch
