@@ -38,6 +38,12 @@ button:hover {
     color: @colorText;
 }
 
+#custom-errors {
+    padding: 0px 5px 0px 5px;
+    color: @colorText;
+    background-color: @colorError;
+
+}
 #battery {
     padding: 0px 5px 0px 5px;
     color: @colorText;

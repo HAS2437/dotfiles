@@ -4,6 +4,7 @@
 @define-color colorPrimary           rgba(138, 17, 17, 1.0);
 @define-color colorSecondary         rgba(86, 19, 19, 1.0);
 @define-color colorAccent            rgba(211, 47, 47, 1.0);
+@define-color colorError             rgba(234, 83, 83, 1.0);
 
 /* @define-color colorText              rgba(255, 255, 2555, 1.0);
 @define-color colorBackground        rgba(0, 0, 0, 0.8);
