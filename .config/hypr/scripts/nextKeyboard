@@ -1,0 +1,4 @@
+#!/bin/env sh
+
+source ~/.config/hypr/scripts/getKeyboard
+hyprctl switchxkblayout $KEYBOARD next

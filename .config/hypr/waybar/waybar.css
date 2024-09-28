@@ -42,9 +42,15 @@ button:hover {
     padding: 0px 5px 0px 5px;
     color: @colorText;
     background-color: @colorError;
-
 }
+
 #battery {
+    padding: 0px 5px 0px 5px;
+    color: @colorText;
+    background-color: @colorSecondary;
+}
+
+#language {
     padding: 0px 5px 0px 5px;
     color: @colorText;
     background-color: @colorPrimary;

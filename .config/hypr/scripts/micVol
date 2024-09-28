@@ -1,0 +1,10 @@
+#!/bin/bash
+
+while true; do
+	SOURCES=$(wpctl status | sed -Ez 's/^.*Audio\n.* ├─.*Sources:\n(.*) │  \n ├─ Filters:\n.*Video\n ├─.*$/\1/' | sed -E 's/^ │  ([* ])   ?([0-9]+).*$/\1\2/' | sed -E 's/^ │  ([* ])   ([0-9]+).*$/\1\2/' | sed 's/ //g' | sed -z 's/\n/ /g')
+	ACTIVE=$(echo $SOURCES | sed -Ez 's/^.*\*([0-9]+).*$/\1/')
+	SOURCES=$(echo $SOURCES | sed -Ez 's/\*//g')
+	
+	wpctl set-volume $ACTIVE 0.50
+	sleep 1
+done

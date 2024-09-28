@@ -1,0 +1,4 @@
+#!/bin/bash
+
+source ~/.config/hypr/scripts/getSinks
+wpctl set-mute $ACTIVE toggle
