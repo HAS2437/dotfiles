@@ -45,7 +45,7 @@ alias yt="youtube-dl"
 alias yt-mp3="youtube-dl -x --audio-format mp3"
 alias whatismyip="curl ifconfig.me && echo"
 
-c++() {
+cpp() {
 	g++ --std=c++20 -ggdb -g3 -D LOCAL -o /tmp/cpp.out $1 && /tmp/cpp.out
 }
 
