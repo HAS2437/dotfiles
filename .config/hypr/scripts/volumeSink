@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env sh
 
 source ~/.config/hypr/scripts/getSinks
 wpctl set-volume $ACTIVE $1

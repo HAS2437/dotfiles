@@ -1,3 +1,5 @@
+#!/bin/env sh
+
 SINKS=$(wpctl status | sed -Ez 's/^.*Audio\n ├─.*Sinks:\n(.*) │  \n ├─ Sources:\n.*Video\n ├─.*$/\1/' | sed -E 's/^ │  ([* ])   ?([0-9]+).*$/\1\2/' | sed -E 's/^ │  ([* ])   ([0-9]+).*$/\1\2/' | sed 's/ //g' | sed -z 's/\n/ /g')
 ACTIVE=$(echo $SINKS | sed -Ez 's/^.*\*([0-9]+).*$/\1/')
 SINKS=$(echo $SINKS | sed -Ez 's/\*//g')
