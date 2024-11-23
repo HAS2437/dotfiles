@@ -28,9 +28,12 @@ PROMPT_COMMAND="history -a;$PROMPT_COMMAND" # Immediately write changes to .bash
 export EDITOR=micro
 export BROWSER=brave
 
+eval "$(zoxide init bash)"
 alias sudo="sudo -E"
 alias fcat="tail -c+1 -F"
 alias ls="ls -Alh --color=auto --group-directories-first"
+alias cd="z"
+alias mkdir="mkdir -p"
 alias rm="trash -r"
 alias cp="cp -r"
 alias grep="grep --color=auto"
