@@ -30,6 +30,7 @@ export BROWSER=brave
 
 eval "$(zoxide init bash)"
 alias sudo="sudo -E"
+alias cat="bat --decorations=always --style=plain --paging=never"
 alias fcat="tail -c+1 -F"
 alias ls="ls -Alh --color=auto --group-directories-first"
 alias cd="z"
