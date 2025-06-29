@@ -1,0 +1,10 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = discord
+
+[Action]
+Description = Vencord: discord patch
+When = PostTransaction
+Exec = /opt/vencord-patch

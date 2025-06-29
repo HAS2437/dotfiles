@@ -1,0 +1,10 @@
+#!/bin/bash
+
+FILE="/lib/systemd/system/ollama.service"
+FIND="Environment=\"HSA_OVERRIDE_GFX_VERSION=10.3.0\""
+PATTERN="(Environment=\"OLLAMA_MODELS=/var/lib/ollama\"\n)"
+REPLACE="\1Environment=\"HSA_OVERRIDE_GFX_VERSION=10.3.0\"\n"
+
+if ! grep -Ps "$FIND" "$FILE" > /dev/null; then
+    sed -Ezi "s%$PATTERN%$REPLACE%" "$FILE"
+fi

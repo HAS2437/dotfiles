@@ -57,8 +57,8 @@ alias py="micro /tmp/tmp.py && python /tmp/tmp.py"
 
 alias 8g="ssh -p 22020 dalopir@server8g.dalopir.com"
 
-# git clone --bare git@github.com:HAS2437/dotfiles.git
-alias config="/usr/bin/git --git-dir=$HOME/dotfiles.git --work-tree=$HOME"
+# git clone --bare git@github.com:HAS2437/dotfiles.git .dotfiles
+alias config="/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 # config checkout
 # config config --local status.showUntrackedFiles no
 

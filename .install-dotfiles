@@ -1,0 +1,55 @@
+#!/bin/sh
+
+! grep -F "source ~/.bashrc-has" ~/.bashrc > /dev/null 2> /dev/null && echo "source ~/.bashrc-has" >> ~/.bashrc
+
+sudo -Es <<'EOF'
+DOTFILES="$HOME/Documents/dotfiles"
+
+installFile() {
+    FILE="$1"
+    if ! [ -f "$FILE" ] && ! [ -L "$FILE" ]; then echo "'$FILE' is not a file"; return 1; fi
+    if ! [ "$2" ]; then
+        DEST="/opt/$(basename "$FILE")";
+        LINK="/usr/local/bin/$(basename "$FILE")";
+    else
+        DEST="$2/$(basename "$FILE")";
+        LINK=0
+    fi
+
+    mkdir -p "$(dirname "$DEST")"
+    if { [ -f "$DEST" ] || [ -L "$DEST" ]; } && ! cmp -s "$DEST" "$FILE"; then
+        echo "Reinstalling $1"
+        rm "$DEST"
+        cp "$FILE" "$DEST"
+    elif ! [ -e "$DEST" ] && ! [ -L "$DEST" ]; then
+        echo "Installing $1"
+        cp "$FILE" "$DEST"
+    fi
+
+    if [ "$LINK" != "0" ]; then
+        if [ -e "$LINK" ] || [ -L "$LINK" ]; then
+            rm "$LINK"
+        fi
+        ln -s "$(realpath -qs "$DEST")" "$LINK"
+    fi
+}
+
+installFile "$DOTFILES/scripts/compress"
+installFile "$DOTFILES/scripts/decompress"
+installFile "$DOTFILES/scripts/proton"
+
+installFile "$DOTFILES/apps/colorpicker"
+installFile "$DOTFILES/apps/colorpicker.desktop" "/usr/share/applications/"
+
+installFile "$DOTFILES/pacman-hooks/vencord-patch"
+installFile "$DOTFILES/pacman-hooks/vencord-patch.hook" "/etc/pacman.d/hooks/"
+installFile "$DOTFILES/pacman-hooks/ollama-amdgpu"
+installFile "$DOTFILES/pacman-hooks/ollama-amdgpu.hook" "/etc/pacman.d/hooks/"
+
+find "$DOTFILES/root" -type f | while IFS= read -r F; do
+    DEST=$(dirname "$(echo "$F" | sed "s|^$DOTFILES/root||")")
+    installFile "$F" "$DEST"
+done
+mkinitcpio -P
+
+EOF

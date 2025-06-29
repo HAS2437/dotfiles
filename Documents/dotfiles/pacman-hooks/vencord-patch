@@ -1,0 +1,13 @@
+#!/bin/env sh
+
+clipath="/tmp/patch-discord-vencord-cli"
+
+curl -s https://api.github.com/repos/Vencord/Installer/releases/latest \
+| jq -r ".assets[] | .browser_download_url" \
+| grep ".*VencordInstallerCli-linux" \
+| wget -O "$clipath" -qi -
+chmod a+x "$clipath"
+
+eval "SUDO_USER=\"dalopir\" $clipath --install --location /opt/discord"
+
+rm -rf "$clipath"

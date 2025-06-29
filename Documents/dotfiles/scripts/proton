@@ -1,0 +1,9 @@
+#!/bin/bash
+
+COMPATDATA="$HOME/.config/proton"
+PROTON="$HOME/.steam/steam/steamapps/common/Proton 8.0/proton"
+
+mkdir -p "$COMPATDATA"
+! test -f "$PROTON" && echo "Proton not found: $PROTON" && exit 1
+
+STEAM_COMPAT_DATA_PATH="$COMPATDATA" STEAM_COMPAT_CLIENT_INSTALL_PATH="$COMPATDATA" "$PROTON" "$@"

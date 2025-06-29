@@ -1,0 +1,44 @@
+#!/bin/python
+
+from genericpath import isfile
+import os, sys, random
+
+specialChars = [" ", ",", ":", ";", "'", "\"",  "(", ")", "[", "]", "{", "}", "<", ">"]
+
+i = 1
+while i < len(sys.argv):
+    f = sys.argv[i]
+    file = os.getcwd()+"/"+f
+    if (os.path.isfile(file)):
+        for c in specialChars:
+            f = f.replace(c, "\\"+c)
+
+        command = ""
+        if (file.endswith(".tgz") or file.endswith(".tar.gz")):
+            command = "tar xvfz "+f
+        elif (file.endswith(".tar") or file.endswith(".tar.xz")):
+            command = "tar xvf "+f        
+        elif (file.endswith(".zip") or file.endswith(".jar")):
+            command = "unzip -o "+f
+        elif (file.endswith(".rar")):
+            command = "unrar x "+f
+        elif (file.endswith(".gz")):
+            command = "gzip -dk "+f
+        elif (file.endswith(".7z")):
+            command = "7z x "+f
+        # elif (file.endswith(".")):
+            # command = " "+file
+        else:
+            print("Unknown file extension for "+sys.argv[i])
+
+        if command != "":
+            tmpFile = "tmp_"+f+"_"+str(int(random.random()*100000))
+            open(tmpFile, "x")
+            print(command)
+            os.system(command)
+            if (os.path.exists(tmpFile) and os.path.isfile(tmpFile)):
+                os.remove(tmpFile)
+    else:
+        print(sys.argv[i]+" not file")
+    
+    i += 1

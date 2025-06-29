@@ -1,0 +1,276 @@
+#!/bin/python
+
+import os, subprocess, argparse, requests
+
+efi = ("/dev/nvme0n1p1", "mkfs.fat -F32")
+root = ("/dev/nvme0n1p2", "mkfs.ext4")
+partitions = [
+    ("/dev/nvme0n1p3", "mkfs.ext4", "/home")
+]
+
+hostname = "archlinux"
+rootPass = "***"
+
+users = [
+#    User           Password         Groups
+    ("dalopir"    , rootPass       , "wheel,audio,video,optical,storage,lp")
+]
+zoneInfo = "Europe/Madrid"
+locale = "en_US\\.UTF-8 UTF-8"
+lang = "en_US.UTF-8"
+keymap = "en"
+parallelDownloads = 8
+
+gitConfig = [
+#    SystemUser     GithubUser      GithubEmail                 DotfilesRepo                            SSHKeyPass       SSHPrivateKey(.ssh/id_ed25519)                                                                                                                                                                                                                                                                                                                                                                                                                      SSHPublicKey(.ssh/id_ed25519.pub)
+    ("dalopir"    , "Dalopir"     , "mail.dalopir@gmail.com"  , "git@github.com:Dalopir/dotfiles"     , ""             , "-----BEGIN OPENSSH PRIVATE KEY-----\n***\n-----END OPENSSH PRIVATE KEY-----\n"      , "ssh-ed25519 *** mail.dalopir@gmail.com")
+# Automatically generate ssh keys: ssh-keygen -t ed25519 -C "mail@default.com" -f id_ed25519 && cat id_ed25519 | sed -Ez "s/\n/\\\n/g" && printf "\n\n" && cat id_ed25519.pub && rm id_ed25519**
+]
+
+# TODO:
+# man-db -> man
+# wl-gammarelay-rs -- NOPE
+# xwaylandvideobridge
+# com.obsproject.studio
+# sunshine-bin -- SKIPPED
+# com.usebottles.bottles
+initialPackages = "base linux linux-firmware"
+aurHelper = "aura-bin"
+aurHelperCommand = "yes | aura -A"
+packages = (
+    "grub efibootmgr dosfstools os-prober mtools ntfs-3g "
+    "iwd dhcpcd "
+    "sudo git base-devel "
+
+    "vim micro neovim tmux man-db net-tools wget openssh sshpass "
+    "zoxide fzf bat trash-cli git-delta btop rocm-smi-lib htop nvtop fastfetch "
+    "gzip zip unzip unrar 7zip yt-dlp "
+    "treesitter-cli gopls "
+    "jdk-openjdk "
+
+    "wayland hyprland waybar mpvpaper waypaper cliphist wl-clipboard wofi dunst grim wl-gammarelay-rs xwaylandvideobridge "
+    "polkit-kde-agent xdg-desktop-portal-hyprland xdg-desktop-portal-gtk "
+    "hyprpicker hyprprop-git "
+    "breeze-icons "
+    "nwg-look nwg-displays font-manager grub-customizer "
+
+    "pipewire pipewire-alsa pipewire-pulse wireplumber pavucontrol helvum "
+    "bluez bluez-utils blueberry "
+    "tlp tlp-rdw tlpui "
+    "cups system-config-printer nwg-look font-manager "
+    "ttf-dejavu gnu-free-fonts calibre noto-fonts ttf-opensans ttf-jetbrains-mono ttf-twemoji noto-fonts-cjk ttf-jetbrains-mono-nerd ttf-liberation-mono-nerd ttf-sourcecodepro-nerd ttf-font-awesome "
+
+    "alacritty kitty thunar tumbler gvfs firefox chromium "
+    "code code-marketplace "
+    "mpv "
+    "gimp libresprite inkscape "
+    "onlyoffice-bin masterpdfeditor-free fbreader "
+    "com.obsproject.studio shotcut audacity "
+    "discord vesktop-bin sunshine-bin moonlight-qt minecraft-launcher modrinth-app-bin steam protonup-qt-bin com.usebottles.bottles "
+    "mangohud corectrl-git mission-center cpu-x "
+    "piper solaar "
+
+    "filezilla nbtexplorer-bin localsend-bin telegram-desktop upscayl-bin "
+)
+
+services = "iwd dhcpcd sshd bluetooth tlp"
+
+parser = argparse.ArgumentParser(
+    description="Auto installer"
+)
+
+parser.add_argument(
+    '-s', '--step-by-step',
+    action='store_true',
+    dest='stepByStep',
+    help='Enable step-by-step mode'
+)
+
+args = parser.parse_args()
+
+stepByStep = args.stepByStep
+
+def logCommand(command):
+    print(command, end="")
+    if stepByStep:
+        print(" (k to skip) ", end="")
+        r = input().lower()
+        return not r in ["k", "skip"]
+    else:
+        print()
+        return True
+
+def run(command, dir=None, log=True):
+    if log:
+        if not logCommand(f"$ {f"({dir}) " if dir is not None else ""}{command}"):
+            return 0
+
+    while True:
+        r = subprocess.call(command, shell=True, cwd=dir)
+
+        if r != 0:
+            print("Command failed. r to retry: ", end="")
+            r = input()
+            if r == "r":
+                continue
+        return r
+
+def runCh(command, dir=None, user=None, log=True):
+    if log:
+        if not logCommand(f"$ {f"({dir}) " if dir is not None else ""}{f"({user}) " if user is not None else ""}{command}"):
+            return 0
+
+    dirCmd = ""
+    if dir is not None:
+        dirCmd = "cd "+dir+"; "
+    userCmd = ""
+    if user is not None:
+        userCmd = "sudo -u "+user+" "
+    command = command.replace("\\", "\\\\").replace("\"", "\\\"")
+
+    while True:
+        r = subprocess.call("arch-chroot /mnt sh -c \""+dirCmd+userCmd+command+"\"", shell=True)
+
+        if r != 0:
+            print("Command failed. r to retry: ", end="")
+            r = input()
+            if r == "r":
+                continue
+        return r
+    
+def formatPartition(device, format):
+    if format != "":
+        if "%" in format:
+            run(f"yes | {format.replace("%", device)}")
+        else:
+            run(f"yes | {format} {device}")
+
+os.popen("cp /etc/pacman.conf /tmp/pacman.conf && sed -Ezi \"s/#\\[multilib\\]\\n#Include = \\/etc\\/pacman\\.d\\/mirrorlist/[multilib]\\nInclude = \\/etc\\/pacman.d\\/mirrorlist/g\" /tmp/pacman.conf")
+allPackages = sorted(os.popen("pacman -Sysq --config /tmp/pacman.conf").read().split("\n"))
+def checkPackages(packages):
+    res = ""
+    for pkg in packages:
+        if pkg in allPackages:
+            if res != "":
+                res += " "
+            res += pkg
+        else:
+            print("Package \""+pkg+"\" does not exist")
+    return res
+
+def checkAurPackages(packages):
+    res = []
+    
+    batch_size = 200 
+
+    for i in range(0, len(packages), batch_size):
+        batch = packages[i:i + batch_size]
+        
+        params = [('arg[]', pkg) for pkg in batch]
+        
+        url = "https://aur.archlinux.org/rpc/v5/info"
+        
+        try:
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if data and data.get('type') == 'multiinfo' and 'results' in data:
+                found = set()
+                for result_pkg in data['results']:
+                    if 'Name' in result_pkg:
+                        res.append(result_pkg['Name'])
+                        found.add(result_pkg['Name'])
+                for pkg in batch:
+                    if not pkg in found:
+                        print(f"AUR Package \"{pkg}\" does not exist: code {response.status_code}")
+            else:
+                print(f"Unexpected AUR RPC response for batch: {data}", file=sys.stderr)
+
+        except requests.exceptions.RequestException as e:
+            print(f"Network error checking AUR for batch (packages {batch[0]} to {batch[-1]}): {e}", file=sys.stderr)
+        except ValueError as e:
+            print(f"JSON decoding error for batch (packages {batch[0]} to {batch[-1]}): {e}", file=sys.stderr)
+        except Exception as e:
+            print(f"An unexpected error occurred during AUR RPC check: {e}", file=sys.stderr)
+            
+    return " ".join(sorted(list(res)))
+
+initialPackages = checkPackages(initialPackages.split(" "))
+packages = packages.split(" ")
+pacmanPackages = checkPackages(packages)
+packages = list(set(packages)-set(pacmanPackages.split(" ")))
+aurPackages = checkAurPackages(packages)
+
+def installAUR(package):
+    runCh("sudo -u nobody sh -c \"git clone https://aur.archlinux.org/"+package+".git /tmp/"+package+"\" && sed -n 's/.*depends = //p' /tmp/"+package+"/.SRCINFO | pacman -S --noconfirm --needed - && sudo -u nobody sh -c \"cd /tmp/"+package+"/ && makepkg -s\" && pacman -U --noconfirm /tmp/"+package+"/**.pkg.tar.zst")
+
+formatPartition(efi[0], efi[1])
+formatPartition(root[0], root[1])
+run("mount "+root[0]+" /mnt")
+for partition in partitions:
+    formatPartition(partition[0], partition[1])
+    run("mkdir -p /mnt"+partition[2])
+    run("mount "+partition[0]+" /mnt"+partition[2])
+run("pacstrap /mnt "+initialPackages)
+run("genfstab -U /mnt >> /mnt/etc/fstab")
+
+print("From now on, commands will be run(in chroot /mnt")
+
+runCh("ln -s /usr/share/zoneinfo/"+zoneInfo+" /etc/localtime")
+runCh("hwclock --systohc")
+
+runCh("sed -Ei \"s/#("+locale+")/\\1/g\" /etc/locale.gen")
+runCh("locale-gen")
+runCh("echo \"LANG="+lang+"\" > /etc/locale.conf")
+runCh("echo \"KEYMAP="+keymap+"\" > /etc/vconsole.conf")
+runCh("echo \""+hostname+"\" > /etc/hostname")
+runCh("echo \"127.0.0.1\tlocalhost\n::1\t\tlocalhost\n127.0.1.1\t"+hostname+".localdomain\t"+hostname+"\" >> /etc/hosts")
+
+if logCommand("$ echo \"***\" | passwd -s"):
+    runCh("echo \""+rootPass+"\" | passwd -s", log=False)
+for user in users:
+    runCh("useradd -m "+user[0])
+    if logCommand("$ echo \"***\" | passwd -s "+user[0]):
+        runCh("echo \""+user[1]+"\" | passwd -s "+user[0], log=False)
+    runCh("usermod -aG "+user[2]+" "+user[0])
+
+runCh("sed -Ei \"s/#Color/Color/g\" /etc/pacman.conf")
+runCh(f"sed -Ei \"s/ParallelDownloads = [0-9]+/ParallelDownloads = {parallelDownloads}/g\" /etc/pacman.conf")
+runCh("sed -Ezi \"s/#\\[multilib\\]\\n#Include = \\/etc\\/pacman\\.d\\/mirrorlist/[multilib]\\nInclude = \\/etc\\/pacman.d\\/mirrorlist/g\" /etc/pacman.conf")
+
+runCh("pacman -Sy --needed --noconfirm "+pacmanPackages)
+runCh("systemctl enable "+services)
+
+runCh("mkdir /boot/EFI")
+runCh("mount "+efi[0]+" /boot/EFI")
+runCh("grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck")
+runCh("grub-mkconfig -o /boot/grub/grub.cfg")
+
+runCh("sed -Ei \"s/# (%wheel ALL=\\(ALL:ALL\\) ALL)/\\1/g\" /etc/sudoers")
+
+# TODO .install dotfiles
+for git in gitConfig:
+    runCh("git config --global user.name \""+git[1]+"\"", user=git[0])
+    runCh("git config --global user.email \""+git[2]+"\"", user=git[0])
+    runCh("git config --global color.ui auto", user=git[0])
+    runCh("mkdir -p /home/"+git[0]+"/.ssh", user=git[0])
+    runCh(" ssh-keygen -F github.com > /dev/null 2> /dev/null || ssh-keyscan github.com >> /home/"+git[0]+"/.ssh/known_hosts", user=git[0])
+    if logCommand("$ ("+git[0]+") echo \"***\" > /home/"+git[0]+"/.ssh/id_ed25519"):
+        runCh("echo \""+git[5]+"\" > /home/"+git[0]+"/.ssh/id_ed25519", user=git[0], log=False)
+    if logCommand("$ ("+git[0]+") echo \"***\" > /home/"+git[0]+"/.ssh/id_ed25519.pub"):
+        runCh("echo \""+git[6]+"\" > /home/"+git[0]+"/.ssh/id_ed25519.pub", user=git[0], log=False)
+    if logCommand("$ ("+git[0]+") sshpass -P \"Enter passphrase for key '/home/"+git[0]+"/.ssh/id_ed25519':\" -p \"***\" git clone --bare "+git[3]+" /home/"+git[0]+"/.dotfiles"):
+        runCh("sshpass -P \"Enter passphrase for key '/home/"+git[0]+"/.ssh/id_ed25519':\" -p \""+git[4]+"\" git clone --bare "+git[3]+" /home/"+git[0]+"/.dotfiles", user=git[0], log=False)
+    runCh("git --git-dir=/home/"+git[0]+"/.dotfiles --work-tree=/home/"+git[0]+"/ checkout", user=git[0])
+
+installAUR(aurHelper)
+
+preStepByStep = stepByStep
+stepByStep = True
+for pkg in aurPackages.split():
+    runCh(f"{aurHelperCommand} {pkg}")
+stepByStep = preStepByStep
+
+run("umount -l /mnt")

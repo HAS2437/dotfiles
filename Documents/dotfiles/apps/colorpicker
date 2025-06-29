@@ -1,0 +1,1 @@
+hyprpicker | sed -Ez "s/^(.*)\n$/\1/" | wl-copy

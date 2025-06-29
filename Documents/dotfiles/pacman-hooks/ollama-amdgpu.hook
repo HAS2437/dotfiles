@@ -1,0 +1,10 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = ollama
+
+[Action]
+Description = Ollama: Environment variable for amd gpus
+When = PostTransaction
+Exec = /opt/ollama-amdgpu
